@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Manager</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: #1a1a2e;
+            color: #eee;
+            padding: 40px 20px;
+            margin: 0;
+        }
+        
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: #16213e;
+            padding: 30px;
+            border-radius: 8px;
+            border: 1px solid #0f3460;
+        }
+        
+        h1 {
+            color: #4a9eff;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        input {
+            padding: 12px;
+            background: #0f3460;
+            border: 1px solid #4a9eff;
+            color: #eee;
+            border-radius: 4px;
+            font-size: 16px;
+            width: 100%;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #6db3ff;
+        }
+        
+        button {
+            padding: 12px 24px;
+            background: #0f3460;
+            color: #4a9eff;
+            border: 1px solid #4a9eff;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.2s;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        button:hover:not(:disabled) {
+            background: #4a9eff;
+            color: #16213e;
+        }
+        
+        .switch-mode {
+            text-align: center;
+            margin-top: 20px;
+            color: #999;
+        }
+        
+        .switch-mode a {
+            color: #4a9eff;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        
+        .error {
+            background: #5a1e1e;
+            color: #f85149;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+        
+        .success {
+            background: #1a472a;
+            color: #2ecc71;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+
+        .info {
+            background: #1a3347;
+            color: #4a9eff;
+            padding: 8px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .user-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            color: #4a9eff;
+            font-size: 14px;
+        }
+        
+        .logout-btn {
+            background: transparent;
+            color: #e74c3c;
+            border: 1px solid #e74c3c;
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .clear-btn {
+            background: transparent;
+            color: #f39c12;
+            border: 1px solid #f39c12;
+            padding: 6px 12px;
+            font-size: 12px;
+            margin-right: 8px;
+        }
+        
+        .task-container {
+            max-width: 700px;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .task {
+            background: #0f3460;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .task.completed {
+            opacity: 0.5;
+        }
+
+        .task.completed .task-title {
+            text-decoration: line-through;
+        }
+
+        .task-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .task-title {
+            word-wrap: break-word;
+        }
+
+        .task-date {
+            font-size: 11px;
+            color: #888;
+            margin-top: 4px;
+        }
+        
+        .task-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .task-buttons button {
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+        
+        .btn-complete {
+            border-color: #2ecc71;
+            color: #2ecc71;
+        }
+        
+        .btn-complete:hover:not(:disabled) {
+            background: #2ecc71;
+            color: #16213e;
+        }
+        
+        .btn-delete {
+            border-color: #e74c3c;
+            color: #e74c3c;
+        }
+        
+        .btn-delete:hover:not(:disabled) {
+            background: #e74c3c;
+            color: #16213e;
+        }
+        
+        .empty {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            padding: 15px;
+            background: #0f3460;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            display: block;
+            font-size: 24px;
+            color: #4a9eff;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            color: #999;
+            font-size: 12px;
+        }
+
+        .password-hint {
+            font-size: 12px;
+            color: #999;
+            margin-top: -10px;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .input-group {
+                flex-direction: column;
+            }
+            
+            .task {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .task-buttons {
+                width: 100%;
+            }
+
+            .task-buttons button {
+                flex: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="authScreen" class="container">
+        <h1>Task Manager</h1>
+        
+        <div id="errorMsg" class="error hidden"></div>
+        <div id="successMsg" class="success hidden"></div>
+        <div id="infoMsg" class="info hidden"></div>
+        
+        <div class="auth-form">
+            <input 
+                type="text" 
+                id="authUsername" 
+                placeholder="Username"
+                autocomplete="username"
+            >
+            <input 
+                type="password" 
+                id="authPassword" 
+                placeholder="Password"
+                autocomplete="current-password"
+            >
+            <div id="passwordHint" class="password-hint hidden">
+                Must be 6+ characters with uppercase, lowercase, and number
+            </div>
+            <button id="authButton" onclick="handleAuth()">Login</button>
+        </div>
+        
+        <div class="switch-mode">
+            <span id="switchText">Don't have an account?</span>
+            <a onclick="switchMode()">Register</a>
+        </div>
+    </div>
+
+    <div id="taskScreen" class="container task-container hidden">
+        <h1>My Tasks</h1>
+        
+        <div class="user-info">
+            <div>Logged in as <strong id="currentUser"></strong></div>
+            <div>
+                <button class="clear-btn" onclick="clearCompleted()">Clear Done</button>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </div>
+        
+        <div class="input-group">
+            <input 
+                type="text" 
+                id="taskInput" 
+                placeholder="What needs to be done?" 
+                maxlength="200"
+                onkeypress="if(event.key==='Enter') addTask()"
+            >
+            <button id="addTaskBtn" onclick="addTask()">Add</button>
+        </div>
+        
+        <div id="taskList"></div>
+
+        <div class="stats">
+            <div class="stat-item">
+                <span class="stat-value" id="totalCount">0</span>
+                <span class="stat-label">Total</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value" id="activeCount">0</span>
+                <span class="stat-label">Active</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value" id="completedCount">0</span>
+                <span class="stat-label">Done</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isLoginMode = true;
+        let authToken = localStorage.getItem('token');
+        let currentUsername = localStorage.getItem('username');
+        let allTasks = [];
+
+        window.onload = function() {
+            if (authToken) {
+                showTaskScreen();
+            }
+        };
+
+        function switchMode() {
+            isLoginMode = !isLoginMode;
+            const button = document.getElementById('authButton');
+            const switchText = document.getElementById('switchText');
+            const passwordHint = document.getElementById('passwordHint');
+            
+            if (isLoginMode) {
+                button.textContent = 'Login';
+                switchText.textContent = "Don't have an account?";
+                passwordHint.classList.add('hidden');
+            } else {
+                button.textContent = 'Register';
+                switchText.textContent = 'Already have an account?';
+                passwordHint.classList.remove('hidden');
+            }
+            
+            hideMessages();
+        }
+
+        async function handleAuth() {
+            const username = document.getElementById('authUsername').value.trim();
+            const password = document.getElementById('authPassword').value;
+            const button = document.getElementById('authButton');
+            
+            if (!username || !password) {
+                showError('Please fill in both fields');
+                return;
+            }
+
+            if (!isLoginMode) {
+                if (username.length < 3 || username.length > 30) {
+                    showError('Username must be 3-30 characters');
+                    return;
+                }
+                if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+                    showError('Username can only contain letters, numbers, and underscores');
+                    return;
+                }
+                if (password.length < 6) {
+                    showError('Password must be at least 6 characters');
+                    return;
+                }
+            }
+            
+            const endpoint = isLoginMode ? '/api/auth/login' : '/api/auth/register';
+            
+            button.disabled = true;
+            const originalText = button.textContent;
+            button.textContent = 'Loading...';
+            
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    authToken = data.token;
+                    currentUsername = data.username;
+                    localStorage.setItem('token', authToken);
+                    localStorage.setItem('username', currentUsername);
+                    
+                    showSuccess(data.message);
+                    setTimeout(() => showTaskScreen(), 1000);
+                } else {
+                    showError(data.error);
+                    button.disabled = false;
+                    button.textContent = originalText;
+                }
+            } catch (error) {
+                showError('Connection error. Please try again.');
+                button.disabled = false;
+                button.textContent = originalText;
+            }
+        }
+
+        function logout() {
+            if (!confirm('Are you sure you want to logout?')) return;
+            
+            localStorage.removeItem('token');
+            localStorage.removeItem('username');
+            authToken = null;
+            currentUsername = null;
+            allTasks = [];
+            
+            document.getElementById('authScreen').classList.remove('hidden');
+            document.getElementById('taskScreen').classList.add('hidden');
+            document.getElementById('authUsername').value = '';
+            document.getElementById('authPassword').value = '';
+            document.getElementById('authButton').disabled = false;
+        }
+
+        function showTaskScreen() {
+            document.getElementById('authScreen').classList.add('hidden');
+            document.getElementById('taskScreen').classList.remove('hidden');
+            document.getElementById('currentUser').textContent = currentUsername;
+            loadTasks();
+        }
+
+        async function addTask() {
+            const input = document.getElementById('taskInput');
+            const title = input.value.trim();
+            const button = document.getElementById('addTaskBtn');
+            
+            if (!title) return;
+
+            if (title.length > 200) {
+                showError('Task too long (max 200 characters)');
+                return;
+            }
+            
+            button.disabled = true;
+            button.textContent = 'Adding...';
+            
+            try {
+                const response = await fetch('/api/tasks', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ title })
+                });
+                
+                if (response.ok) {
+                    input.value = '';
+                    await loadTasks();
+                } else if (response.status === 401 || response.status === 403) {
+                    showError('Session expired. Please login again.');
+                    setTimeout(logout, 2000);
+                } else {
+                    showError('Failed to add task');
+                }
+            } catch (error) {
+                showError('Error adding task');
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Add';
+            }
+        }
+
+        async function loadTasks() {
+            try {
+                const response = await fetch('/api/tasks', {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                
+                if (response.status === 401 || response.status === 403) {
+                    showError('Session expired. Please login again.');
+                    setTimeout(logout, 2000);
+                    return;
+                }
+                
+                const data = await response.json();
+                allTasks = data.tasks || data;
+                
+                displayTasks();
+                updateStats();
+            } catch (error) {
+                showError('Error loading tasks');
+            }
+        }
+
+        function displayTasks() {
+            const taskList = document.getElementById('taskList');
+            
+            if (allTasks.length === 0) {
+                taskList.innerHTML = '<div class="empty">No tasks yet. Add one above!</div>';
+                return;
+            }
+            
+            taskList.innerHTML = allTasks.map(task => {
+                const date = new Date(task.createdAt).toLocaleDateString();
+                return `
+                    <div class="task ${task.completed ? 'completed' : ''}">
+                        <div class="task-content">
+                            <div class="task-title">${escapeHtml(task.title)}</div>
+                            <div class="task-date">${date}</div>
+                        </div>
+                        <div class="task-buttons">
+                            <button class="btn-complete" onclick="toggleTask('${task._id}', ${!task.completed})">
+                                ${task.completed ? 'Undo' : 'Done'}
+                            </button>
+                            <button class="btn-delete" onclick="deleteTask('${task._id}')">Delete</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateStats() {
+            const total = allTasks.length;
+            const completed = allTasks.filter(t => t.completed).length;
+            const active = total - completed;
+            
+            document.getElementById('totalCount').textContent = total;
+            document.getElementById('activeCount').textContent = active;
+            document.getElementById('completedCount').textContent = completed;
+        }
+
+        async function toggleTask(id, completed) {
+            try {
+                const response = await fetch(`/api/tasks/${id}`, {
+                    method: 'PUT',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ completed })
+                });
+                
+                if (response.ok) {
+                    await loadTasks();
+                } else {
+                    showError('Failed to update task');
+                }
+            } catch (error) {
+                showError('Error updating task');
+            }
+        }
+
+        async function deleteTask(id) {
+            if (!confirm('Delete this task?')) return;
+            
+            try {
+                const response = await fetch(`/api/tasks/${id}`, { 
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                
+                if (response.ok) {
+                    await loadTasks();
+                } else {
+                    showError('Failed to delete task');
+                }
+            } catch (error) {
+                showError('Error deleting task');
+            }
+        }
+
+        async function clearCompleted() {
+            const completedCount = allTasks.filter(t => t.completed).length;
+            
+            if (completedCount === 0) {
+                showInfo('No completed tasks to clear');
+                return;
+            }
+            
+            if (!confirm(`Delete ${completedCount} completed task(s)?`)) return;
+            
+            try {
+                const response = await fetch('/api/tasks/completed/all', {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                
+                if (response.ok) {
+                    await loadTasks();
+                    showSuccess('Completed tasks cleared');
+                } else {
+                    showError('Failed to clear tasks');
+                }
+            } catch (error) {
+                showError('Error clearing tasks');
+            }
+        }
+
+        function showError(message) {
+            const errorMsg = document.getElementById('errorMsg');
+            errorMsg.textContent = message;
+            errorMsg.classList.remove('hidden');
+            setTimeout(() => errorMsg.classList.add('hidden'), 5000);
+        }
+
+        function showSuccess(message) {
+            const successMsg = document.getElementById('successMsg');
+            successMsg.textContent = message;
+            successMsg.classList.remove('hidden');
+            setTimeout(() => successMsg.classList.add('hidden'), 3000);
+        }
+
+        function showInfo(message) {
+            const infoMsg = document.getElementById('infoMsg');
+            infoMsg.textContent = message;
+            infoMsg.classList.remove('hidden');
+            setTimeout(() => infoMsg.classList.add('hidden'), 3000);
+        }
+
+        function hideMessages() {
+            document.getElementById('errorMsg').classList.add('hidden');
+            document.getElementById('successMsg').classList.add('hidden');
+            document.getElementById('infoMsg').classList.add('hidden');
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
